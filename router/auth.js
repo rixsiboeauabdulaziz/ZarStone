@@ -6,27 +6,25 @@ import jwt from "jsonwebtoken"
 let router = express.Router()
 
 router.post("/register", async (req, res) => {
-    let { username, email, password } = req.body
+    let { username, email, password, role } = req.body  // ← добавить role
     let exisUser = await User.findOne({ email });
 
     if (exisUser) {
-        return res.status(400).send({ message: "This user alredy exist" })
+        return res.status(400).send({ message: "This user already exist" })
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPasswort = await bcrypt.hash(password, salt);
 
-
     const user = await User.create({
         username,
         email,
-        password: hashedPasswort
+        password: hashedPasswort,
+        role  
     })
 
     res.send({ message: "User create", userId: user._id })
-
 })
-
 
 
 

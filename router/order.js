@@ -6,7 +6,7 @@ router.post("/orders", async (req, res) => {
     try {
         let { user, product, quantity } = req.body;
 
-        let order = new Order({
+        let order = new order({
             user,
             product,
             quantity

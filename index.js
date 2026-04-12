@@ -10,8 +10,8 @@ import express from "express"
 import cors from "cors"
 
 let app = express()
-app.use(express.json())
 app.use(cors())
+app.use(express.json())
 
 mongoose.connect(process.env.URL_MONGOOSE).then(() => {
     console.log("mongoose");
@@ -24,6 +24,8 @@ app.use(Categories)
 app.use(authRouter)
 app.use(userRouter)
 app.use(OrderRouter)
+
+
 
 
 app.listen(process.env.PORT, () => {
