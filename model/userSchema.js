@@ -8,6 +8,12 @@ const usersSchema = new mongoose.Schema(
             unique: true,
             trim: true,
         },
+        phone: {
+            type: Number,
+            required: true,
+            unique: true,
+            trim: true,
+        },
         email: {
             type: String,
             required: true,
@@ -18,6 +24,10 @@ const usersSchema = new mongoose.Schema(
             type: String,
             required: true,
             minlength: 6
+        },
+        img: {
+            type: String,
+            required: true
         },
         role: {
             type: String,

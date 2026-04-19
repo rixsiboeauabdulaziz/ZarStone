@@ -1,9 +1,13 @@
+// orderSchema.js
 import mongoose from "mongoose";
 
 let OrderSchema = mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Users",
+    name: {
+        type: String,
+        required: true
+    },
+    phone: {
+        type: String,
         required: true
     },
     product: {
@@ -18,5 +22,4 @@ let OrderSchema = mongoose.Schema({
 }, { timestamps: true });
 
 let Order = mongoose.model("Orders", OrderSchema);
-
 export default Order;

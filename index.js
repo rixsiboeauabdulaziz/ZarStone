@@ -10,6 +10,7 @@ import express from "express"
 import cors from "cors"
 
 let app = express()
+app.use('/upload',express.static("upload"))
 app.use(cors())
 app.use(express.json())
 

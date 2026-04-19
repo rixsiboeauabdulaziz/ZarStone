@@ -9,10 +9,15 @@ let ProductsSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    color: {
+        type: String,
+        required: true
+    },
     price: {
         type: Number,
         required: true
     },
+
     desc: String,
 
     comments: [
@@ -36,7 +41,6 @@ let ProductsSchema = mongoose.Schema({
         ref: "Categories",
         required: true
     },
-    desc: String
 
 })
 
