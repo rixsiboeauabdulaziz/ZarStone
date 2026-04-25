@@ -6,8 +6,8 @@ let router = express.Router()
 router.get("/users", async (req, res) => {
 
     try {
-        let products = await Users.find()
-        res.send(products)
+        let users  = await Users.find()
+        res.send(users )
     } catch (err) {
         console.log(err.message);
     }
@@ -16,17 +16,17 @@ router.get("/users", async (req, res) => {
 
 router.get("/users/:id", async (req, res) => {
     try {
-        let producs = await Users.findById(req.params.id)
-        res.send(producs)
+        let users  = await Users.findById(req.users.id)
+        res.send(users )
     } catch (err) {
         console.log(err.message);
     }
 })
 
-router.post("/Users", checkAdmin ,async (req, res) => {
+router.post("/users",checkAdmin, async (req, res) => {
     try {
-        let producs = new Users(req.body)
-        await producs.save()
+        let users  = new Users(req.body)
+        await users.save()
         res.send("Products created!")
     } catch (err) {
         console.log(err.message);
@@ -48,7 +48,9 @@ router.put("/users/:id",checkAdmin, async (req, res) => {
     }
 })
 
-router.delete("/users/:id",checkAdmin, async (req, res) => {
+
+
+router.delete("/users/:id", async (req, res) => {
     try {
         let dProduct = await Users.findByIdAndDelete(
             req.params.id

@@ -5,7 +5,7 @@ import category from "../router/categories.js"
 import checkAdmin from "../middlewares/checkAdmin.js"
 import upload from "../middlewares/upload.js"
 let router = express.Router()
-
+import auth  from "../middlewares/auth.js"
 
 router.get("/products", async (req, res) => {
 
@@ -52,7 +52,7 @@ router.get("/products/:id", async (req, res) => {
     }
 })
 
-router.post("/products", checkAdmin, upload.single("image"), async (req, res) => {
+router.post("/products", checkAdmin, auth,upload.single("image"), async (req, res) => {
 
     const imageUrl =
         req.protocol + ".//" + req.get("host") + "/uploads/" + req.file.fieldname;
@@ -76,11 +76,6 @@ router.post("/products", checkAdmin, upload.single("image"), async (req, res) =>
 
 
 router.patch("/products/:id/comment", async (req, res) => {
-
-
-
-
-
     try {
         let { user, text } = req.body
 
@@ -100,7 +95,7 @@ router.patch("/products/:id/comment", async (req, res) => {
     }
 })
 
-router.put("/products/:id", upload.single("image"), checkAdmin, async (req, res) => {
+router.put("/products/:id", auth, upload.single("image"), checkAdmin, async (req, res) => {
 
     let updateData = ({
         title, price, color, desc
@@ -127,7 +122,7 @@ router.put("/products/:id", upload.single("image"), checkAdmin, async (req, res)
     }
 })
 
-router.delete("/products/:id", checkAdmin, async (req, res) => {
+router.delete("/products/:id", auth,checkAdmin, async (req, res) => {
     try {
         let dProduct = await Product.findByIdAndDelete(
             req.params.id

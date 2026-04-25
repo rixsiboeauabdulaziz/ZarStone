@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken"
 let router = express.Router()
 
 router.post("/register", async (req, res) => {
-    let { username, email, password, role } = req.body  // ← добавить role
+    let { username, email, password, role ,img,phone} = req.body  // ← добавить role
     let exisUser = await User.findOne({ email });
 
     if (exisUser) {
@@ -19,6 +19,8 @@ router.post("/register", async (req, res) => {
     const user = await User.create({
         username,
         email,
+        img,
+        phone,
         password: hashedPasswort,
         role  
     })
@@ -30,9 +32,9 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
     try {
-        const { email, password } = req.body
+        const { email, password,phone} = req.body
 
-        const user = await User.findOne({ email })
+        const user = await User.findOne({ email, phone})
         if (!user) {
             return res.status(400).send("User not found")
         }

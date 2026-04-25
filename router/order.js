@@ -26,4 +26,15 @@ router.get("/orders", async (req, res) => {
     }
 });
 
+router.delete("/orders/:id", async (req, res) => {
+    try {
+        let deleted = await Order.findByIdAndDelete(req.params.id)
+        if (!deleted) return res.status(404).json({ message: "Заказ не найден" })
+        res.json({ message: "Заказ удалён", id: req.params.id })
+    } catch (error) {
+        res.status(500).json(error.message)
+    }
+})
+
+
 export default router

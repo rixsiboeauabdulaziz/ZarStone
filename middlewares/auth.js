@@ -10,6 +10,7 @@ let auth = (req, res, next) => {
     try {
 
         let decode = jwt.verify(tokin, process.env.JWT_SECRET)
+        console.log("decoded user:", decode)
         req.user = decode
         next()
     } catch (err) {
