@@ -1,69 +1,83 @@
 import express from "express"
-import bcrypt from "bcryptjs"
-import User from "../model/userSchema.js"
+import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import User from "../model/userSchema.js"
+import upload from "../middlewares/upload.js"
 
-let router = express.Router()
+const router = express.Router()
 
-router.post("/register", async (req, res) => {
-    let { username, email, password, role ,img,phone} = req.body  // ← добавить role
-    let exisUser = await User.findOne({ email });
+router.post("/register", upload.single("img"), async (req, res) => {
+  try {
+    const { username, email, password, phone } = req.body
 
-    if (exisUser) {
-        return res.status(400).send({ message: "This user already exist" })
+
+    if (!username || !email || !password || !phone) {
+      return res.status(400).json({ message: "Заполни все поля" })
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPasswort = await bcrypt.hash(password, salt);
+ 
+    const exist = await User.findOne({ email })
+    if (exist) {
+      return res.status(400).json({ message: "Email уже используется" })
+    }
 
-    const user = await User.create({
-        username,
-        email,
-        img,
-        phone,
-        password: hashedPasswort,
-        role  
+  
+    const hash = await bcrypt.hash(password, 10)
+
+    const img = req.file ? `/upload/${req.file.filename}` : ""
+
+    const user = new User({
+      username,
+      email,
+      password: hash,
+      phone,
+      img,
     })
 
-    res.send({ message: "User create", userId: user._id })
-})
+    await user.save()
 
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    )
+
+    res.json({ token, role: "user" })
+
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: err.message })
+  }
+}),
 
 
 router.post("/login", async (req, res) => {
-    try {
-        const { email, password,phone} = req.body
+  try {
+      const { email, password } = req.body  // убери phone
 
-        const user = await User.findOne({ email, phone})
-        if (!user) {
-            return res.status(400).send("User not found")
-        }
+      const user = await User.findOne({ email })  // ✅ только по email
+      if (!user) {
+          return res.status(400).json({ message: "User not found" })
+      }
 
+      const isMatch = await bcrypt.compare(password, user.password)
+      if (!isMatch) {
+          return res.status(400).json({ message: "Password is incorrect" })
+      }
 
-        const isMatch = await bcrypt.compare(password, user.password)
-        if (!isMatch) {
-            return res.status(400).send("Password is incorrect")
-        }
+      const token = jwt.sign(
+          { id: user._id, role: user.role },
+          process.env.JWT_SECRET,
+          { expiresIn: process.env.JWT_EXPIRE }
+      )
 
-        const token = jwt.sign(
-            { id: user._id, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRE }
+      res.json({ message: "Login successful", token, role: user.role })
 
-        )
-
-        res.json({
-            message: "Login successful",
-            token,
-        })
-
-    } catch (err) {
-        console.log(err.message)
-        res.status(500).send("Server error")
-    }
+  } catch (err) {
+      console.log(err.message)
+      res.status(500).json({ message: "Server error" })
+  }
 })
-
-
 
 //  "username":"abdulaziz",
 // "email":"abdulaziz11", 

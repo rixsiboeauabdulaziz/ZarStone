@@ -10,9 +10,15 @@ import express from "express"
 import cors from "cors"
 
 let app = express()
-app.use('/upload',express.static("upload"))
-app.use(cors())
+app.use(cors({
+    origin: "http://localhost:5173", // порт твоего React
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+  }))
+ 
 app.use(express.json())
+app.use('/upload',express.static("upload"))
 
 mongoose.connect(process.env.URL_MONGOOSE).then(() => {
     console.log("mongoose");

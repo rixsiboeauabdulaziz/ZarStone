@@ -3,20 +3,17 @@ import jwt from "jsonwebtoken"
 let auth = (req, res, next) => {
     const header = req.headers.authorization
     if (!header) {
-        return res.send("No token")
+        return res.status(401).json({ message: "No token" })
     }
     
-    let tokin = header.split(" ")[1];
+    let token = header.split(" ")[1];
     try {
-
-        let decode = jwt.verify(tokin, process.env.JWT_SECRET)
-        console.log("decoded user:", decode)
+        let decode = jwt.verify(token, process.env.JWT_SECRET)
         req.user = decode
         next()
     } catch (err) {
-        console.log(err.message);
+        return res.status(401).json({ message: "Invalid token" }) // ✅ добавь return
     }
-
 }
 
 export default auth

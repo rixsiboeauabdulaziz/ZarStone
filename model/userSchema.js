@@ -9,7 +9,7 @@ const usersSchema = new mongoose.Schema(
             trim: true,
         },
         phone: {
-            type: Number,
+            type: String, 
             required: true,
             unique: true,
             trim: true,
@@ -27,7 +27,7 @@ const usersSchema = new mongoose.Schema(
         },
         img: {
             type: String,
-            required: true
+            default: "" 
         },
         role: {
             type: String,

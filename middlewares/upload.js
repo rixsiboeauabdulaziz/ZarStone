@@ -1,22 +1,29 @@
 import multer from "multer"
-import paht from "path"
-
+import path from "path"
 
 const storage = multer.diskStorage({
-    destination: (req, file, cd) => {
-        cd(null, "upload/")
-    },
-
-    filename: (req, file, cd) => {
-
-        const ext = paht.extname(file.originalname)
-
-
-        cd(null, Date.now() + ext)
-    }
-
+  destination: (req, file, cb) => {
+    cb(null, "upload/")
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname)
+    cb(null, Date.now() + ext)
+  },
 })
 
-const upload = multer({ storage })
+// 🔥 фильтр (очень важно)
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true)
+  } else {
+    cb(new Error("Только изображения!"), false)
+  }
+}
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter,
+})
 
 export default upload
