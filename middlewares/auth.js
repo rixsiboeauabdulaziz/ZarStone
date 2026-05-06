@@ -5,7 +5,6 @@ let auth = (req, res, next) => {
     if (!header) {
         return res.status(401).json({ message: "No token" })
     }
-    
     let token = header.split(" ")[1];
     try {
         let decode = jwt.verify(token, process.env.JWT_SECRET)
@@ -14,6 +13,8 @@ let auth = (req, res, next) => {
     } catch (err) {
         return res.status(401).json({ message: "Invalid token" }) // ✅ добавь return
     }
+
+    
 }
 
 export default auth

@@ -1,63 +1,66 @@
-import express from "express";
-import Categories from "../model/categoriesSchema.js";
+import express from "express"
+import Categories from "../model/categoriesSchema.js"
+import auth from "../middlewares/auth.js"
+import checkAdmin from "../middlewares/checkAdmin.js"
 
-let route = express.Router();
+let router = express.Router()
 
-route.get("/categories", async (req, res) => {
-    let { title } = req.query;
-
-    let filter = {};
-    if (title) {
-        filter.title = title;
-    }
-
+router.get("/categories", async (req, res) => {
+    let { title } = req.query
+    let filter = {}
+    if (title) filter.title = title
     try {
-        let categories = await Categories.find(filter);
-        res.send(categories);
+        let categories = await Categories.find(filter)
+        res.json(categories)
     } catch (err) {
-        res.status(500).send(err.message);
+        res.status(500).json({ message: err.message })
     }
-});
+})
 
-route.get("/categories/:id", async (req, res) => {
+router.get("/categories/:id", async (req, res) => {
     try {
-        let categories = await Categories.findById(req.params.id);
-        res.send(categories);
+        let category = await Categories.findById(req.params.id)
+        res.json(category)
     } catch (err) {
-        res.status(500).send(err.message);
+        res.status(500).json({ message: err.message })
     }
-});
+})
 
-route.post("/categories", async (req, res) => {
+router.post("/categories", auth, checkAdmin, async (req, res) => {
     try {
-        let categories = new Categories(req.body);
-        await categories.save();
-        res.send("Categories created!");
+        const category = new Categories({  // ✅ Categories, не Category
+            title: req.body.title,
+            img:   req.body.img,
+            desc:  req.body.desc,
+        })
+        await category.save()
+        res.status(201).json(category)
     } catch (err) {
-        res.status(500).send(err.message);
+        res.status(500).json({ message: err.message })
     }
-});
+})
 
-route.put("/categories/:id", async (req, res) => {
+router.put("/categories/:id", auth, checkAdmin, async (req, res) => {
     try {
-        let uCategories = await Categories.findByIdAndUpdate(
+        const updated = await Categories.findByIdAndUpdate(  // ✅ Categories
             req.params.id,
-            req.body,
+            { title: req.body.title, img: req.body.img, desc: req.body.desc },
             { new: true }
-        );
-        res.send({ message: "Categories updated", uCategories });
+        )
+        if (!updated) return res.status(404).json({ message: "Not found" })
+        res.json(updated)
     } catch (err) {
-        res.status(500).send(err.message);
+        res.status(500).json({ message: err.message })
     }
-});
+})
 
-route.delete("/categories/:id", async (req, res) => {
+router.delete("/categories/:id", auth, checkAdmin, async (req, res) => {
     try {
-        let dCategories = await Categories.findByIdAndDelete(req.params.id);
-        res.send({ message: "Categories deleted", dCategories });
+        const deleted = await Categories.findByIdAndDelete(req.params.id)
+        res.json({ message: "Category deleted", deleted })
     } catch (err) {
-        res.status(500).send(err.message);
+        res.status(500).json({ message: err.message })
     }
-});
+})
 
-export default route;
+export default router

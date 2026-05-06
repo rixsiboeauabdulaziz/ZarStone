@@ -43,34 +43,34 @@ router.get("/products", async (req, res) => {
 })
 
 
+// Бэкенд - исправь этот роут
 router.get("/products/:id", async (req, res) => {
     try {
-        let producs = await Product.findById(req.params.id)
-        res.send(producs)
+      let product = await Product.findById(req.params.id).populate("category", "title"); // ← добавь populate
+      res.send(product);
     } catch (err) {
-        console.log(err.message);
+      console.log(err.message);
     }
-})
+  });
 
-router.post("/products", checkAdmin, auth,upload.single("image"), async (req, res) => {
-
-    const imageUrl =
-        req.protocol + ".//" + req.get("host") + "/uploads/" + req.file.fieldname;
-
+router.post("/products", auth, checkAdmin, async (req, res) => {
     try {
-        let producs = new Product({
+        const product = new Product({
             title: req.body.title,
             color: req.body.color,
-            price: req.body.price,
+            price: Number(req.body.price),
             desc: req.body.desc,
-            img: imageUrl,
-
-
+            img: req.body.img,
+            category: req.body.category,
         })
-        await producs.save()
-        res.send("Products created!")
+        await product.save()
+        
+        // ✅ Возвращаем объект с _id, populate категории
+        const populated = await product.populate("category", "title")
+        res.status(201).json(populated)
     } catch (err) {
-        console.log(err.message);
+        console.error(err.message)
+        res.status(500).json({ message: err.message })
     }
 })
 
@@ -93,34 +93,34 @@ router.patch("/products/:id/comment", async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message })
     }
-})
+}),
 
-router.put("/products/:id", auth, upload.single("image"), checkAdmin, async (req, res) => {
+router.put("/products/:id", auth, checkAdmin, async (req, res) => {
+    const { title, price, color, desc, img, category } = req.body
 
-    let updateData = ({
-        title, price, color, desc
-    } = req.body)
-
-    if (req.file) {
-        const imageUrl = req.protocol + ".//" + req.get("host") + "/uploads/" + req.file.fieldname;
-        updateData.img = imageUrl
-
-    }
-
-
+    const updateData = {}
+    if (title    !== undefined) updateData.title    = title
+    if (price    !== undefined) updateData.price    = Number(price)
+    if (color    !== undefined) updateData.color    = color
+    if (desc     !== undefined) updateData.desc     = desc
+    if (img      !== undefined) updateData.img      = img
+    if (category !== undefined) updateData.category = category
 
     try {
-        let uProduct = await Product.findByIdAndUpdate(
+        const uProduct = await Product.findByIdAndUpdate(
             req.params.id,
             updateData,
             { new: true }
-        )
+        ).populate("category", "title") // ✅ populate чтобы фронт получил объект категории
 
-        res.send({ message: "Product updated", uProduct })
+        if (!uProduct) return res.status(404).json({ message: "Product not found" })
+        res.json(uProduct) // ✅ возвращаем объект, а не обёртку
     } catch (err) {
-        console.log(err.message);
+        console.error(err.message)
+        res.status(500).json({ message: err.message })
     }
 })
+
 
 router.delete("/products/:id", auth,checkAdmin, async (req, res) => {
     try {
